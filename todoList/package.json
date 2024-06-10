@@ -72,7 +72,11 @@
       "node"
     ],
     "collectCoverageFrom": [
-      "src/**/*.{ts,tsx}"
+      "src/**/*.{ts,tsx}",
+      "!src/App.tsx",
+      "!src/@types/global.d.ts",
+      "!src/index.ts",
+      "!src/components/index.tsx"
     ],
     "coverageDirectory": "coverage",
     "coverageReporters": [
@@ -81,7 +85,10 @@
       "lcov"
     ],
     "testPathIgnorePatterns": [
-      "<rootDir>/src/App.tsx"
+      "<rootDir>/src/App.tsx",
+      "<rootDir>/src/@types/global.d.ts",
+      "<rootDir>/src/index.ts",
+      "<rootDir>/src/components/index.tsx"
     ]
   }
 }

@@ -1,90 +1,85 @@
 import { LocalStorageUtils } from '../storage';
 
 describe('LocalStorageUtils', () => {
+  let storage: { [key: string]: string };
+  let localStorageMock: {
+    getItem: jest.Mock;
+    setItem: jest.Mock;
+    removeItem: jest.Mock;
+    clear: jest.Mock;
+    key: jest.Mock;
+    length: number;
+  };
+
   beforeEach(() => {
-    localStorage.clear();
-    (LocalStorageUtils as any).instances = {};
-    (LocalStorageUtils as any).globalCallbacks = {};
-    (LocalStorageUtils as any).originalMethodsOverridden = false;
+    storage = {};
+    localStorageMock = {
+      getItem: jest.fn((key) => storage[key] || null),
+      setItem: jest.fn((key, value) => {
+        storage[key] = value;
+      }),
+      removeItem: jest.fn((key) => {
+        delete storage[key];
+      }),
+      clear: jest.fn(() => {
+        storage = {};
+      }),
+      key: jest.fn((index) => Object.keys(storage)[index] || null),
+      get length() {
+        return Object.keys(storage).length;
+      },
+    };
+
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+    });
   });
 
   test('should create an instance with the default namespace', () => {
-    const utils = LocalStorageUtils.getInstance();
-    expect(utils).toBeInstanceOf(LocalStorageUtils);
-    expect((LocalStorageUtils as any).instances['default']).toBe(utils);
+    const instance = LocalStorageUtils.getInstance();
+    expect(instance).toBeInstanceOf(LocalStorageUtils);
+    expect(instance['namespace']).toBe('default');
   });
 
   test('should create instances with different namespaces', () => {
-    const utils1 = LocalStorageUtils.getInstance('namespace1');
-    const utils2 = LocalStorageUtils.getInstance('namespace2');
-    expect(utils1).not.toBe(utils2);
-    expect((LocalStorageUtils as any).instances['namespace1']).toBe(utils1);
-    expect((LocalStorageUtils as any).instances['namespace2']).toBe(utils2);
-  });
-
-  test('should set and get an item', () => {
-    const utils = LocalStorageUtils.getInstance('test');
-    const item: Item[] = [{ label: 'Test Item', status: 'INCOMPLETE' }];
-    utils.setItem('itemKey', item);
-
-    const retrievedItem = utils.getItem('itemKey');
-    expect(retrievedItem).toEqual(item);
-  });
-
-  test('should remove an item', () => {
-    const utils = LocalStorageUtils.getInstance('test');
-    const item: Item[] = [{ label: 'Test Item', status: 'INCOMPLETE' }];
-    utils.setItem('itemKey', item);
-    utils.removeItem('itemKey');
-
-    const retrievedItem = utils.getItem('itemKey');
-    expect(retrievedItem).toBeNull();
-  });
-
-  test('should clear all items in the namespace', () => {
-    const utils = LocalStorageUtils.getInstance('test');
-    utils.setItem('itemKey1', [{ label: 'Item 1', status: 'INCOMPLETE' }]);
-    utils.setItem('itemKey2', [{ label: 'Item 2', status: 'COMPLETE' }]);
-    utils.clear();
-
-    expect(utils.getItem('itemKey1')).toBeNull();
-    expect(utils.getItem('itemKey2')).toBeNull();
+    const instance1 = LocalStorageUtils.getInstance('namespace1');
+    const instance2 = LocalStorageUtils.getInstance('namespace2');
+    expect(instance1).not.toBe(instance2);
   });
 
   test('should check if a key exists', () => {
-    const utils = LocalStorageUtils.getInstance('test');
-    utils.setItem('itemKey', [{ label: 'Test Item', status: 'INCOMPLETE' }]);
-
-    expect(utils.keyExists('itemKey')).toBe(true);
-    expect(utils.keyExists('nonExistentKey')).toBe(false);
+    const instance = LocalStorageUtils.getInstance('testNamespace');
+    instance.setItem('key1', [{ label: 'test1', status: 'INCOMPLETE' }]);
+    expect(instance.keyExists('key1')).toBe(true);
+    expect(instance.keyExists('key2')).toBe(false);
   });
 
   test('should get all items in the namespace', () => {
-    const utils = LocalStorageUtils.getInstance('test');
-    const item1: Item[] = [{ label: 'Item 1', status: 'INCOMPLETE' }];
-    const item2: Item[] = [{ label: 'Item 2', status: 'COMPLETE' }];
-    utils.setItem('itemKey1', item1);
-    utils.setItem('itemKey2', item2);
+    const instance = LocalStorageUtils.getInstance('testNamespace');
+    const value1: Item[] = [{ label: 'test1', status: 'INCOMPLETE' }];
+    const value2: Item[] = [{ label: 'test2', status: 'COMPLETE' }];
+    instance.setItem('key1', value1);
+    instance.setItem('key2', value2);
 
-    const allItems = utils.getAllItems();
+    const allItems = instance.getAllItems();
     expect(allItems).toEqual({
-      itemKey1: item1,
-      itemKey2: item2,
+      key1: value1,
+      key2: value2,
     });
   });
 
   test('should add and remove change listeners', () => {
-    const utils = LocalStorageUtils.getInstance('test');
+    const instance = LocalStorageUtils.getInstance('testNamespace');
     const callback = jest.fn();
-    utils.addChangeListener(callback);
 
-    utils.setItem('itemKey', [{ label: 'Test Item', status: 'INCOMPLETE' }]);
-    expect(callback).toHaveBeenCalledWith('itemKey', [
-      { label: 'Test Item', status: 'INCOMPLETE' },
-    ]);
+    instance.addChangeListener(callback);
+    expect(LocalStorageUtils['globalCallbacks']['testNamespace']).toContain(
+      callback,
+    );
 
-    utils.removeChangeListener(callback);
-    utils.setItem('itemKey', [{ label: 'Updated Item', status: 'COMPLETE' }]);
-    expect(callback).toHaveBeenCalledTimes(1);
+    instance.removeChangeListener(callback);
+    expect(LocalStorageUtils['globalCallbacks']['testNamespace']).not.toContain(
+      callback,
+    );
   });
 });

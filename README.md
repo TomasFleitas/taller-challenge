@@ -4,6 +4,9 @@
 
 This project contains all the components needed for the ToDo list functionality. The components in this project are designed to be served and used in the `todoConsumer` project as a micro frontend.
 
+## Storage Implementation
+The idea behind this project was to create a storage that allows being listened to, in such a way that it doesn't depend on different levels of React for rerendering. The storage is global and will only trigger rerendering in the components that are listening to the state within the namespace.
+
 ### How to Run
 
 1. Navigate to the project directory:

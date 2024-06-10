@@ -7,7 +7,7 @@ module.exports = (_, argv) => ({
     publicPath:
       argv.mode === 'development'
         ? 'http://localhost:8081/'
-        : 'https://taller-challenge-list.web.app/',
+        : 'https://taller-challenge-consumer.web.app/',
   },
 
   resolve: {
