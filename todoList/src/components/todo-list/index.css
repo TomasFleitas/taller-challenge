@@ -1,0 +1,14 @@
+.todo-list-component {
+  min-width: 300px;
+}
+
+.todo-list-component .ant-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.todo-list-component-header {
+  display: flex;
+  gap: 10px;
+}

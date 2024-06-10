@@ -1,0 +1,15 @@
+.todo-list-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.todo-list-header h5 {
+  font-size: 16px;
+}
+
+.todo-list-controller {
+  display: flex;
+  gap: 10px;
+}

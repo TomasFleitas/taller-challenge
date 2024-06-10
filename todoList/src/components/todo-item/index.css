@@ -1,0 +1,22 @@
+.todo-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  align-items: center;
+}
+
+.todo-item-text {
+  display: flex;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.todo-item-text:hover {
+  opacity: 0.8;
+}
+
+.todo-item-text .completed {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
